@@ -11,17 +11,23 @@ import sys
 class TypedClassDict:
     def __init__(self, **kwargs):
         self._items = {}
-        hints = get_type_hints(self.signature) # pylint: disable=no-member
+        self._hints = get_type_hints(self.signature) # pylint: disable=no-member
         for k, v in kwargs.items():
-            if k not in hints:
+            if k not in self._hints:
                 print(f'WARNING: extra argument: [{k}: {v}]', file=sys.stderr)
                 continue
-            self._items[k] = self._dict_to_value(hints[k], k, v)
+            self._items[k] = self._dict_to_value(self._hints[k], k, v)
         # check missing arguments
         try:
-            self.signature(**{k: v for k, v in kwargs.items() if k in hints}) # pylint: disable=no-member
+            self.signature(**{k: v for k, v in kwargs.items() if k in self._hints}) # pylint: disable=no-member
         except TypeError as e:
             raise Exception(f'{type(self).__name__}: {e}')
+
+    def set(self, key, value):
+        self._items[key] = self._dict_to_value(self._hints[key], key, value)
+
+    def get(self, key):
+        return self._items[key]
 
     def _dict_to_value(self, hint, key, value_raw):
         if hasattr(hint, '__origin__'):
@@ -47,8 +53,7 @@ class TypedClassDict:
 
     def to_dict(self):
         items = {}
-        hints = get_type_hints(self.signature) # pylint: disable=no-member
-        for k, hint in hints.items():
+        for k, hint in self._hints.items():
             value = self._items.get(k)
             if value is None: continue
             items[k] = self._value_to_dict(value)
