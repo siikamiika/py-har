@@ -8,10 +8,9 @@ HTTP Archive parser for Python >= 3.8.
 import py_har
 import json
 
-with open('file.har') as f:
-    har_data = json.loads(f.read())
-
-har = py_har.Har(**har_data)
+har = py_har.Har(**json.loads(open('file.har').read()))
+har.get('log').get('entries')[1].set('startedDateTime', '2020-01-01')
+print(json.dumps(har.get('log').get('entries')[1].to_dict(), indent=4))
 ```
 
 ## License
