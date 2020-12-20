@@ -1,6 +1,6 @@
 # py-har
 
-HTTP Archive parser for Python >= 3.8.
+HTTP Archive parser and mutator for Python >= 3.8.
 
 ## Usage
 
