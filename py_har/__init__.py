@@ -15,4 +15,5 @@ from .har import (
     Entry,
     Log,
     Har,
+    TypedClassDict,
 )

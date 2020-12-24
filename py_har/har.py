@@ -59,6 +59,17 @@ class TypedClassDict:
             items[k] = self._value_to_dict(value)
         return items
 
+    def flat_properties_to_dict(self):
+        items = {}
+        # include None
+        for k in self._hints:
+            value = self._items.get(k)
+            if isinstance(value, (TypedClassDict, list)):
+                items[k] = str(value)
+                continue
+            items[k] = self._value_to_dict(value)
+        return items
+
     def _value_to_dict(self, value):
         if isinstance(value, list):
             return [self._value_to_dict(v) for v in value]
