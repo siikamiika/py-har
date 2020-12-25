@@ -27,7 +27,7 @@ class TypedClassDict:
         self._items[key] = self._dict_to_value(self._hints[key], key, value)
 
     def get(self, key):
-        return self._items[key]
+        return self._items.get(key)
 
     def _dict_to_value(self, hint, key, value_raw):
         if hasattr(hint, '__origin__'):
@@ -59,13 +59,14 @@ class TypedClassDict:
             items[k] = self._value_to_dict(value)
         return items
 
-    def flat_properties_to_dict(self):
+    def flat_properties_to_dict(self, include_raw=False):
         items = {}
         # include None
         for k in self._hints:
             value = self._items.get(k)
             if isinstance(value, (TypedClassDict, list)):
-                items[k] = str(value)
+                if include_raw:
+                    items[k] = value
                 continue
             items[k] = self._value_to_dict(value)
         return items
