@@ -51,6 +51,9 @@ class TypedClassDict:
             raise TypeError(f'Type of {key} is {type(value_raw)} and not an instance of {hint}')
         return value_raw
 
+    def items(self):
+        return {**self._items}
+
     def to_dict(self):
         items = {}
         for k, hint in self._hints.items():
