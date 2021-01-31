@@ -42,7 +42,7 @@ class TypedClassDict:
                 hint2 = hint.__args__[0]
                 return [self._dict_to_value(hint2, f'{key}[{i}]', v) for i, v in enumerate(value_raw)]
         if issubclass(hint, datetime.datetime):
-            return datetime.datetime.fromisoformat(value_raw)
+            return datetime.datetime.fromisoformat(value_raw.replace('Z', '+00:00'))
         if issubclass(hint, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             return ipaddress.ip_address(value_raw)
         if issubclass(hint, TypedClassDict):
@@ -106,8 +106,8 @@ class Browser(TypedClassDict):
 class PageTimings(TypedClassDict):
     def signature(
         self,
-        onContentLoad: int,
-        onLoad: int,
+        onContentLoad: Union[int, float],
+        onLoad: Union[int, float],
         comment: Optional[str]=None,
     ):
         pass
@@ -222,13 +222,13 @@ class Cache(TypedClassDict):
 class Timings(TypedClassDict):
     def signature(
         self,
-        blocked: Optional[int]=None,
-        dns: Optional[int]=None,
-        connect: Optional[int]=None,
-        send: Optional[int]=None,
-        wait: Optional[int]=None,
-        receive: Optional[int]=None,
-        ssl: Optional[int]=None,
+        blocked: Union[int, float, None]=None,
+        dns: Union[int, float, None]=None,
+        connect: Union[int, float, None]=None,
+        send: Union[int, float, None]=None,
+        wait: Union[int, float, None]=None,
+        receive: Union[int, float, None]=None,
+        ssl: Union[int, float, None]=None,
         comment: Optional[str]=None,
     ):
         pass
@@ -238,7 +238,7 @@ class Entry(TypedClassDict):
         self,
         pageref: str,
         startedDateTime: datetime.datetime,
-        time: int,
+        time: Union[int, float],
         request: Request,
         response: Response,
         cache: Cache,
@@ -255,9 +255,9 @@ class Log(TypedClassDict):
         self,
         version: str,
         creator: Creator,
-        browser: Browser,
         pages: List[Page],
         entries: List[Entry],
+        browser: Optional[Browser]=None,
         comment: Optional[str]=None,
     ):
         pass
