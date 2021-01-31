@@ -36,8 +36,8 @@ class TypedClassDict:
                     try:
                         return self._dict_to_value(hint2, key, value_raw)
                     except Exception as e: # TODO handle errors
-                        print(e, file=sys.stderr)
                         continue
+                raise TypeError(f'Type of {key} is {type(value_raw)} and none of {hint.__args__}')
             if hint.__origin__ == list:
                 hint2 = hint.__args__[0]
                 return [self._dict_to_value(hint2, f'{key}[{i}]', v) for i, v in enumerate(value_raw)]
