@@ -32,19 +32,23 @@ class TypedClassDict:
     def _dict_to_value(self, hint, key, value_raw):
         if hasattr(hint, '__origin__'):
             if hint.__origin__ == Union:
+                errors = []
                 for hint2 in hint.__args__:
                     try:
                         return self._dict_to_value(hint2, key, value_raw)
                     except Exception as e: # TODO handle errors
+                        errors.append(e)
                         continue
-                raise TypeError(f'Type of {key} is {type(value_raw)} and none of {hint.__args__}')
+                errors_str = '\n'.join(str(e) for e in errors)
+                raise TypeError(f'Type of {key} is {type(value_raw)} and none of {hint.__args__}\n{errors_str}')
             if hint.__origin__ == list:
                 hint2 = hint.__args__[0]
                 return [self._dict_to_value(hint2, f'{key}[{i}]', v) for i, v in enumerate(value_raw)]
         if issubclass(hint, datetime.datetime):
             return datetime.datetime.fromisoformat(value_raw.replace('Z', '+00:00'))
         if issubclass(hint, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-            return ipaddress.ip_address(value_raw)
+            if value_raw == '': return None
+            return ipaddress.ip_address(value_raw.replace('[', '').replace(']', ''))
         if issubclass(hint, TypedClassDict):
             return hint(**value_raw)
         if not isinstance(value_raw, hint):
@@ -161,8 +165,8 @@ class PostData(TypedClassDict):
     def signature(
         self,
         mimeType: str,
-        params: List[QueryParam],
         text: str,
+        params: Optional[List[QueryParam]]=None,
         comment: Optional[str]=None,
     ):
         pass
@@ -236,13 +240,13 @@ class Timings(TypedClassDict):
 class Entry(TypedClassDict):
     def signature(
         self,
-        pageref: str,
         startedDateTime: datetime.datetime,
         time: Union[int, float],
         request: Request,
         response: Response,
         cache: Cache,
         timings: Timings,
+        pageref: Optional[str]=None,
         connection: Optional[str]=None,
         serverIPAddress: Union[ipaddress.IPv4Address, ipaddress.IPv6Address, None]=None,
         _securityState: Optional[str]=None,
